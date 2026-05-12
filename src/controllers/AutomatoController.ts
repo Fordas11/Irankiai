@@ -6,19 +6,23 @@ import type { Automatas, AutomatoPrekė, AutomatoBūsena, AutomatoPrekėsBūsena
 type AutomatoFormDuomenys = Omit<Automatas, 'id' | 'created_at' | 'revenue_today'>;
 
 export const AutomatoController = {
-  // 4.2.14 Step 2: AutomatuSarasoLangas → AutomatoController
-  // Calls rastiVisusAutomatus on entity (step 3), returns automatu sąrašas (step 4)
+
   gautiVisusAutomatus: (): Automatas[] => {
     return useStore.getState().rastiVisusAutomatus();
   },
-
-  // 4.2.14 Step 8: AutomatuSarasoLangas → AutomatoController
-  // Calls rastiAutomatusPagalFiltra on entity (step 9), returns filtruotas sąrašas (step 10)
+    /* Use case: Perziureti automatu sarasa. Sequence: step 4, step 5 (gautiVisusAutomatus(), automatu sarasas)
+        AutomatoController ---> Automatas (entity)
+        AutomatoController <- - - Automatas
+     Use case: Perziureti automatu sarasa. Sequence: step 11, step 12 
+     (rastiAutomatusPagalFiltra(filtras), filtruotas automatu sarasas)
+        AutomatoController ---> Automatas (entity)
+        Automatas <- - - AutomatoController*/
   filtruotiAutomatus: (filtras: { search?: string; status?: string }): Automatas[] => {
     return useStore.getState().rastiAutomatusPagalFiltra(filtras);
   },
 
   // 4.2.15 Sukurti automatą — Step 2: AutomatoKurimoLangas → AutomatoController
+  //Default reiksmes kai yra atidaromas langas
   atidarytiKūrimoFormą: (): AutomatoFormDuomenys => {
     return {
       name: '',
@@ -31,9 +35,12 @@ export const AutomatoController = {
     };
   },
 
-  // 4.2.15 Step 6: AutomatoKurimoLangas → AutomatoController
-  // Calls sukurtiAutomatą on entity (step 7); on success calls atvaizduotiSukurtąAutomatąSąraše (step 11),
-  // on failure calls rodytKlaidosPranešimą (step 13)
+/*  Use case: Sukurti automata. Sequence step step 5, step 6, step 7 
+    (Patikrinti duomenis, IssaugotiAutomata(duomenys), automatas issaugotas)
+        AutomatoController ---> AutomatoController
+        AutomatoController ---> Automatas
+        AutomatoController <- - - Automatas
+         */ 
   PatvirtintiAutomatoKūrimą: (
     duomenys: AutomatoFormDuomenys,
     atvaizduotiSukurtąAutomatąSąraše: () => void,

@@ -5,7 +5,7 @@ import Layout from './components/Layout';
 // Ribinės klasės (Boundary) — vartotojo sąsajos langai
 import Prisijungti from './pages/Login';                               // paketas: Naudotojas
 import PagrindinisLangas from './pages/Dashboard';                     // paketas: Main
-import AutomatuSarasoLangas from './pages/Machines';                   // paketas: Administracijos
+import AutomatuSarasoLangas from './pages/MachinesView';                   // paketas: Administracijos
 import PildytiPrekes from './pages/Inventory';                         // paketas: Aptarnavimo
 import NaudotojuSarasas from './pages/Users';                          // paketas: Administracijos
 import AtvaizduotiDienotvarke from './pages/ServicePlanning';          // paketas: Dienotvarkės

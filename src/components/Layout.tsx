@@ -77,6 +77,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="pt-4 pb-1">
                 <div className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Admin</div>
               </div>
+              {/* Use case: Perziureti automatu sarasa, Sequence: step 1 (atidaryti automatu saraso langa) 
+                  Technikas ---> AutomatuSarasoLangas (boundary) */}
               {ADMIN_NAV.map(({ to, label, Icon }) => (
                 <NavLink key={to} to={to} className={linkClass}>
                   <Icon className="w-4 h-4 shrink-0" />

@@ -1,54 +1,32 @@
-import { useStore } from '../store/useStore';
 import { RevenueIcon, ServerIcon, StockIcon, ClipboardIcon } from '../components/Icons';
+import { useMachinesViewModel } from "../viewmodels/MachinesViewModel";
+import type { AutomatoBūsena } from "../types";
+import { StatCard } from '../components/Statcard';
 
-const STATUS_LABEL: Record<string, string> = {
-  operational: 'Operational',
-  offline: 'Offline',
-  needs_service: 'Needs Service',
-  broken: 'Broken',
-  maintenance: 'Maintenance',
-  servicing: 'Servicing',
-};
-
-const STATUS_STYLE: Record<string, string> = {
-  operational: 'bg-green-100 text-green-700',
-  offline: 'bg-slate-100 text-slate-500',
-  needs_service: 'bg-yellow-100 text-yellow-700',
-  broken: 'bg-red-100 text-red-700',
-  maintenance: 'bg-blue-100 text-blue-700',
-  servicing: 'bg-purple-100 text-purple-700',
-};
-
-const STATUS_DOT: Record<string, string> = {
-  operational: 'bg-green-500',
-  offline: 'bg-slate-400',
-  needs_service: 'bg-yellow-500',
-  broken: 'bg-red-500',
-  maintenance: 'bg-blue-500',
-  servicing: 'bg-purple-500',
-};
 
 // Ribinė klasė: PagrindinisLangas (Boundary) — paketas: Main
 export default function PagrindinisLangas() {
-  const { machines, machineProducts, tasks } = useStore();
 
-  const totalRevenue = machines.reduce((s, m) => s + m.revenue_today, 0);
-  const active = machines.filter(m => m.status === 'operational').length;
-  const needsService = machines.filter(m => m.status === 'needs_service' || m.status === 'broken').length;
-  const offline = machines.filter(m => m.status === 'offline').length;
-  const pendingTasks = tasks.filter(t => t.status === 'pending').length;
-
-  const avgStock = (() => {
-    if (!machineProducts.length) return 0;
-    const pct = machineProducts.reduce((s, mp) => s + mp.quantity / mp.max_quantity, 0) / machineProducts.length;
-    return Math.round(pct * 100);
-  })();
-
-  const getStockPct = (machineId: string) => {
-    const mps = machineProducts.filter(mp => mp.machine_id === machineId);
-    if (!mps.length) return 0;
-    return Math.round(mps.reduce((s, mp) => s + mp.quantity / mp.max_quantity, 0) / mps.length * 100);
-  };
+  const {
+        search,
+        setSearch,
+        filterStatus,
+        setFilterStatus,
+        filtered,
+        STATUSES,
+        STATUS_LABEL,
+        STATUS_STYLE,
+        STATUS_DOT,
+        totalRevenue,
+        active,
+        needsService,
+        offline,
+        pendingTasks,
+        avgStock,
+        machines,
+        tasks,
+        getStockPct,
+      } = useMachinesViewModel();
 
   return (
     <div className="p-6">
@@ -93,17 +71,32 @@ export default function PagrindinisLangas() {
           iconBg="bg-orange-50 text-orange-600"
         />
       </div>
-
+      <div className="flex gap-3 my-4">
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by name or address..."
+          className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <select
+          value={filterStatus}
+          onChange={e => setFilterStatus(e.target.value)}
+          className="px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+        >
+          <option value="all">All Statuses</option>
+          {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s as AutomatoBūsena]}</option>)}
+        </select>
+      </div>
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
         <div className="px-6 py-5 border-b border-slate-100">
           <h2 className="font-semibold text-slate-800">Machine Status Overview</h2>
         </div>
         <div className="divide-y divide-slate-100">
-          {machines.map(m => {
+          {filtered.map(m => {
             const stock = getStockPct(m.id);
             return (
               <div key={m.id} className="px-6 py-4 flex items-center gap-4">
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 max-w-240">
                   <div className="font-medium text-slate-800 text-sm">{m.name}</div>
                   <div className="text-xs text-slate-500 mt-0.5">{m.address}</div>
                 </div>
@@ -127,32 +120,13 @@ export default function PagrindinisLangas() {
               </div>
             );
           })}
+          {filtered.length === 0 && (
+                   <p className="px-5 py-10 text-center text-slate-400">No machines found</p>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function StatCard({
-  label, sublabel, value, badge, badgeColor, icon, iconBg,
-}: {
-  label: string;
-  sublabel?: React.ReactNode;
-  value: React.ReactNode;
-  badge?: string;
-  badgeColor?: string;
-  icon: React.ReactNode;
-  iconBg: string;
-}) {
-  return (
-    <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-      <div className="flex items-start justify-between mb-3">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg}`}>{icon}</div>
-        {badge && <span className={`text-xs font-medium ${badgeColor}`}>{badge}</span>}
-      </div>
-      <div className="text-2xl font-bold text-slate-800">{value}</div>
-      <div className="text-sm text-slate-500 mt-1">{label}</div>
-      {sublabel && <div className="text-xs text-slate-400 mt-1">{sublabel}</div>}
-    </div>
-  );
-}
+
