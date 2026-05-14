@@ -4,6 +4,14 @@ import { useStore } from '../store/useStore';
 import type { Automatas, AutomatoPrekė, AutomatoBūsena, AutomatoPrekėsBūsena } from '../types';
 
 type AutomatoFormDuomenys = Omit<Automatas, 'id' | 'created_at' | 'revenue_today'>;
+const today = () => new Date().toISOString().split('T')[0];
+
+const uzbaigtiAktyviasUzduotis = (automatoId: string, tipai: Array<'refill' | 'maintenance' | 'repair'>) => {
+  const store = useStore.getState();
+  store.tasks
+    .filter(t => t.machine_id === automatoId && t.status !== 'completed' && tipai.includes(t.type))
+    .forEach(t => store.atnaujintiUžduotį(t.id, { status: 'completed' }));
+};
 
 export const AutomatoController = {
 
@@ -90,9 +98,19 @@ export const AutomatoController = {
     automatoId: string,
     sekmesZinute: () => void
   ): AutomatoPrekė[] => {
-    const prekes = useStore.getState().machineProducts.filter(mp => mp.machine_id === automatoId);
+    const store = useStore.getState();
+    const prekes = store.machineProducts.filter(mp => mp.machine_id === automatoId);
+    prekes.forEach(mp => {
+      store.atnaujintiPrekęAutomatui(mp.id, {
+        quantity: mp.max_quantity,
+        refill_date: today(),
+        status: 'good',
+      });
+    });
+    store.atnaujintiAutomatą(automatoId, { status: 'operational', last_serviced: today() });
+    uzbaigtiAktyviasUzduotis(automatoId, ['refill']);
     sekmesZinute();
-    return prekes;
+    return useStore.getState().machineProducts.filter(mp => mp.machine_id === automatoId);
   },
 
   // 4.2.7 Step 15: Automato informacija → AutomatoController (pildytiGraza)
@@ -100,7 +118,8 @@ export const AutomatoController = {
     automatoId: string,
     sekmesZinute: () => void
   ): void => {
-    void automatoId;
+    useStore.getState().atnaujintiAutomatą(automatoId, { status: 'operational', last_serviced: today() });
+    uzbaigtiAktyviasUzduotis(automatoId, ['refill']);
     sekmesZinute();
   },
 
@@ -109,7 +128,8 @@ export const AutomatoController = {
     automatoId: string,
     sekmesZinute: () => void
   ): void => {
-    useStore.getState().issaugotiAutomatoBusena(automatoId, 'maintenance');
+    useStore.getState().atnaujintiAutomatą(automatoId, { status: 'operational', last_serviced: today() });
+    uzbaigtiAktyviasUzduotis(automatoId, ['repair', 'maintenance']);
     sekmesZinute();
   },
 };

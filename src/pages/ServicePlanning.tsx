@@ -78,10 +78,10 @@ export default function AtvaizduotiDienotvarke() {
   const sekmesZinute = () => { setZinute('Sėkmės žinutė'); setTimeout(() => setZinute(null), 2000); };
 
   // 4.2.7 Step 4: atvaizduotiDienotvarke (DienotvarkėsController → boundary)
-  const atvaizduotiDienotvarke = (_dt: Dienotvarkė[]) => {
-    void _dt;
-    setForm({ ...EMPTY_FORM, machine_id: machines[0]?.id ?? '' });
-    setModal('add');
+  const atvaizduotiDienotvarke = (dt: Dienotvarkė[]) => {
+    setTab('pending');
+    setZinute(dt.length > 0 ? `Sugeneruota dienotvarkė: ${dt.length} užduotys` : 'Dienotvarkei tinkamų automatų nerasta');
+    setTimeout(() => setZinute(null), 2500);
   };
 
   // 4.2.7 Step 1/2: generuotiDienotvarke (PagrindinisLangas → DienotvarkėsController)
@@ -106,18 +106,21 @@ export default function AtvaizduotiDienotvarke() {
   const pildytiPrekes = () => {
     if (!automatoInformacija) return;
     AutomatoController.pildytiPrekes(automatoInformacija.id, sekmesZinute);
+    setAutomatoInformacija(AutomatoController.gautiAutomata(automatoInformacija.id) ?? null);
   };
 
   // 4.2.7 Step 14/15: pildytiGraza (boundary → AutomatoController) → ref Papildyti grąžą → sekmesZinute
   const pildytiGraza = () => {
     if (!automatoInformacija) return;
     AutomatoController.pildytiGraza(automatoInformacija.id, sekmesZinute);
+    setAutomatoInformacija(AutomatoController.gautiAutomata(automatoInformacija.id) ?? null);
   };
 
   // 4.2.7 Step 18/19: tvarkytiAutomata (boundary → AutomatoController) → ref Tvarkyti automatą → sekmesZinute
   const tvarkytiAutomata = () => {
     if (!automatoInformacija) return;
     AutomatoController.tvarkytiAutomata(automatoInformacija.id, sekmesZinute);
+    setAutomatoInformacija(AutomatoController.gautiAutomata(automatoInformacija.id) ?? null);
   };
 
   // redaguoti užduotį
