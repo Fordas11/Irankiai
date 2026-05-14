@@ -1,7 +1,8 @@
-import { RevenueIcon, ServerIcon, StockIcon, ClipboardIcon } from '../components/Icons';
+import { RevenueIcon, ServerIcon, StockIcon, ClipboardIcon, PlayIcon } from '../components/Icons';
 import { useMachinesViewModel } from "../viewmodels/MachinesViewModel";
 import type { AutomatoBūsena } from "../types";
 import { StatCard } from '../components/Statcard';
+import { AutomatoController } from '../controllers/AutomatoController';
 
 
 // Ribinė klasė: PagrindinisLangas (Boundary) — paketas: Main
@@ -28,11 +29,26 @@ export default function PagrindinisLangas() {
         getStockPct,
       } = useMachinesViewModel();
 
+  const handleTestRun = () => {
+    const res = AutomatoController.laikoIvykis();
+    alert(res);
+    window.location.reload(); // Refresh to see status changes in the store
+  };
+
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Real-time overview of your vending machine network</p>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Real-time overview of your vending machine network</p>
+        </div>
+        <button 
+          onClick={handleTestRun}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+        >
+          <PlayIcon className="w-4 h-4" />
+          Vykdyti galiojimo patikrą (laikoIvykis)
+        </button>
       </div>
 
       <div className="grid grid-cols-4 gap-4 mb-6">

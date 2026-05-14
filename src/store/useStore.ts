@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Automatas, Prekė, AutomatoPrekė, Naudotojas, Dienotvarkė } from '../types';
+import type { Automatas, Prekė, AutomatoPrekė, Naudotojas, Dienotvarkė, AutomatoBūsena } from '../types';
 
 const MACHINES: Automatas[] = [
   { id: '1', name: 'Downtown Mall', model: 'VM-2000', address: '123 Main Street, Building A', longitude: 23.8813, latitude: 54.9027, status: 'operational', revenue_today: 1250, created_at: '2025-01-10', last_serviced: '2026-04-01' },
@@ -111,6 +111,10 @@ interface StoreState {
   sukurtiUžduotį: (t: Omit<Dienotvarkė, 'id' | 'created_at'>) => void;
   atnaujintiUžduotį: (id: string, t: Partial<Dienotvarkė>) => void;
   pašalintiUžduotį: (id: string) => void;
+
+  // New methods for diagrams
+  gautiAutomatoPrekę: (id: string) => AutomatoPrekė | undefined;
+  gautiBūsenas: () => AutomatoBūsena[];
 }
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -234,6 +238,10 @@ export const useStore = create<StoreState>()(
       sukurtiUžduotį: (t) => set(s => ({ tasks: [...s.tasks, { ...t, id: uid(), created_at: today() }] })),
       atnaujintiUžduotį: (id, t) => set(s => ({ tasks: s.tasks.map(x => x.id === id ? { ...x, ...t } : x) })),
       pašalintiUžduotį: (id) => set(s => ({ tasks: s.tasks.filter(x => x.id !== id) })),
+
+      // Entity methods for diagrams
+      gautiAutomatoPrekę: (id) => get().machineProducts.find(mp => mp.id === id),
+      gautiBūsenas: () => ['operational', 'offline', 'needs_service', 'broken', 'maintenance', 'servicing'],
     }),
     { name: 'vendingos-store-v2' }
   )
